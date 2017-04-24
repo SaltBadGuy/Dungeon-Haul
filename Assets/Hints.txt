@@ -1,0 +1,21 @@
+Press Z to use a potion to heal yourself for 25% of your max HP.
+Press X to destroy the next wall tile you move into.
+Press C to instantly win the next combat you enter.
+Check the strength of any enemy before you fight them.
+The 4 qualities for enemies/equipment: Common, Magical, Epic and Mythical.
+The Parry passive will prevent damage when activated.
+The Lifesteal passive heals for a percentage of the damage they deal.
+The Critical passive will double the damage when activated.
+The Burn passive will apply damage that stacks with each attack.
+The passive number is how much it will do or how likely it is to activate.
+The higher the number next to a passive, the better.
+Use picks to bypass tough enemies and get to staircases or chests.
+Use curses to destroy powerful enemies as soon as you enter combat.
+Use potions to heal yourself out of combat.
+Items can't be used in combat.
+This game was inspired by The Enchanted Cave.
+The highest floor achieved during testing was floor 16.
+Use WASD to move around.
+Press Space to equip Equipment out of chests and to descend stairs.
+The goal is to descend as many floors as possible before you die.
+The better the rarity, the larger amount of Passives and STR.
