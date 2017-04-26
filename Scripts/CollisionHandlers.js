@@ -232,3 +232,19 @@ function ColliderStairs(game, height, width, cellsize, gridwidth, gridheight, gr
         return ReturnStuff;
 }
 
+function ColliderStairsCall(){
+    HudText.TextElement1.setText("Staircase");
+    HudText.TextElement2.setText("Press Space to go to the next floor");
+    HudText.TextElement1.alpha = 1;
+    HudText.TextElement2.alpha = 1;
+    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+        FloorStuff = ColliderStairs(game, height, width, cellsize, gridwidth, gridheight, gridwidthgap, gridheightgap, GridArr, EnemyArr, ChestArr, scalenum, PC, StairObject, EnemyID, ChestID, EquipID, CurrentFloor, HudText);
+    }
+    GridArr = FloorStuff.GridArr;
+    PC = FloorStuff.PC;
+    StairObject = FloorStuff.StairObject;
+    CurrentFloor = FloorStuff.CurrentFloor;
+
+    console.log(FloorStuff);
+}
+

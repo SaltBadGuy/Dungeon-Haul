@@ -10,7 +10,7 @@
  * @param CurrentFloor
  * @constructor
  */
-function UpdateHudElements(game, HudText, PC, enemy, CurrentFloor, HintToDisplay) {
+function UpdateHudElements(game, HudText, PC, enemy, CurrentFloor) {
 
     HudText.PCHPText.setText("HP = " + PC.PCCURHP + "/" + PC.PCMAXHP);
 
@@ -144,6 +144,8 @@ function UpdateHudElements(game, HudText, PC, enemy, CurrentFloor, HintToDisplay
     }
 
     HudText.FloorNo.setText("Floor " + CurrentFloor);
+
+    HintToDisplay = hints[Math.floor(Math.random()* hints.length)]
 
     HudText.HintText.setText(HintToDisplay);
 }

@@ -1,5 +1,7 @@
 /**
  * Created by alistair mcmonnies on 03/02/2014.
+ *
+ * Keeping this handy since it's a useful basis for floor generation
  * */
 
 /*globals Image, document, window, console*/
