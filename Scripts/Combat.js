@@ -32,9 +32,9 @@ function Combat(game, combatEvent, textEvents, Player, Enemy, InCombat) {
         Delay: 0
     }
     console.log("At the start of combat, player HP was at " + Player.PCCURHP);
-    console.log("At the start of combat, enemy HP was at " + Enemy.ENHP);
+    console.log("At the start of combat, enemy HP was at " + Enemy.HP);
     Player.pcsprite.x -= 16;
-    Enemy.enemysprite.x += 16;
+    Enemy.sprite.x += 16;
     combatEvent.push(game.time.events.loop(1000, function () {
         WhoAttacks(game, combatEvent, textEvents, Player, Enemy, CombatTurn, Burn, InCombat, Delay)
     }, this));
@@ -60,7 +60,7 @@ function WhoAttacks(game, combatEvent, textEvents, Player, Enemy, Turn, Burn, In
     console.log(Player);
     console.log(Player.PCCURHP);
     console.log(Enemy);
-    console.log(Enemy.ENHP);
+    console.log(Enemy.HP);
     console.log(Turn.Turn);
     console.log("STARTING A NEW WHOATTACKS");
 
@@ -73,44 +73,42 @@ function WhoAttacks(game, combatEvent, textEvents, Player, Enemy, Turn, Burn, In
     console.log(Delay.Delay);
     Delay.Delay = 0;
 
-    if (Player.PCCURHP < 1 || Enemy.ENHP < 1 || Player.CursesActive === true) {
+    if (Player.PCCURHP < 1 || Enemy.HP < 1 || Player.CursesActive === true) {
         console.log("Ending combat");
         if (Player.PCCURHP <= 0) {
             console.log("Destroying Player");
             Player.pcsprite.destroy();
             game.time.events.removeAll(combatEvent);
-            game.time.events.removeAll(textEvents);
             InCombat.InCombat = false;
         }
-        if (Enemy.ENHP <= 0) {
+        if (Enemy.HP <= 0) {
             console.log("Destroying Enemy");
             Player.pcsprite.x += 16;
-            Enemy.enemysprite.destroy();
+            Enemy.sprite.destroy();
             game.time.events.removeAll(combatEvent);
-            game.time.events.removeAll(textEvents);
             InCombat.InCombat = false;
         }
         if (Player.CursesActive) {
             console.log("Cursed the enemy! Insta-kill!");
-            Enemy.enemysprite.destroy();
+            Enemy.sprite.destroy();
             game.time.events.removeAll(combatEvent);
             Player.pcsprite.x += 16;
             InCombat.InCombat = false;
             Player.CursesActive = false;
             Delay.Delay = -1000;
-            new CombatTextGen(game, Enemy.enemysprite.x + 32, Enemy.enemysprite.y, "Cursed! Insta-kill!", "", Turn, textEvents, Delay);
+            new CombatTextGen(game, Enemy.sprite.x + 32, Enemy.sprite.y, "Cursed! Insta-kill!", "", Turn, textEvents, Delay);
 
         }
     }
     if (InCombat.InCombat){
         if (Turn.Turn === true) {
-            if (Player.PCCURHP > 0 || Enemy.ENHP > 0) {
+            if (Player.PCCURHP > 0 || Enemy.HP > 0) {
                 console.log("Player's turn to attack!");
                 PlayerAttack(game, Player, Enemy, Turn, PassiveEffects, Burn, combatEvent, textEvents, Delay);
             }
         }
         else {
-            if (Player.PCCURHP > 0 || Enemy.ENHP > 0) {
+            if (Player.PCCURHP > 0 || Enemy.HP > 0) {
                 console.log("Enemy's turn to attack!");
                 EnemyAttack(game, Player, Enemy, Turn, PassiveEffects, Burn, combatEvent, textEvents, Delay);
             }
@@ -147,14 +145,14 @@ function DealDamage(game, P, A, D, AATK, DDEF, Burn, Turn, combatEvents, textEve
         if (P.Lifesteal > 0 ) {
             new CombatTextGen(game, A.pcsprite.x, A.pcsprite.y, "Healed for ", (ActualDamage / 100) * P.Lifesteal, Turn, textEvents, Delay);
         }
-        D.ENHP -= ActualDamage;
-        new CombatTextGen(game, D.enemysprite.x + 32, D.enemysprite.y, "", ActualDamage, Turn, textEvents, Delay);
-        D.ENHP -= Burn.PBurn;
+        D.HP -= ActualDamage;
+        new CombatTextGen(game, D.sprite.x + 32, D.sprite.y, "", ActualDamage, Turn, textEvents, Delay);
+        D.HP -= Burn.PBurn;
     }
     else{
-        A.ENHP += ((ActualDamage / 100) * P.Lifesteal);
+        A.HP += ((ActualDamage / 100) * P.Lifesteal);
         if (P.Lifesteal > 0 ) {
-            new CombatTextGen(game, A.enemysprite.x, A.enemysprite.y, "Healed for ", (ActualDamage / 100) * P.Lifesteal, Turn, textEvents, Delay);
+            new CombatTextGen(game, A.sprite.x, A.sprite.y, "Healed for ", (ActualDamage / 100) * P.Lifesteal, Turn, textEvents, Delay);
         }
         D.PCCURHP -= ActualDamage;
         new CombatTextGen(game, D.pcsprite.x, D.pcsprite.y, "", ActualDamage, Turn, textEvents, Delay);
@@ -162,85 +160,28 @@ function DealDamage(game, P, A, D, AATK, DDEF, Burn, Turn, combatEvents, textEve
     }
 }
 
-function CombatTextGen(game, x, y, message, number, Turn, textEvents, Delay){
-    console.log(Delay.Delay);
-    Delay.Delay += 200;
-    console.log(Delay.Delay);
-    textEvents.push(game.time.events.add(Delay.Delay, function (){
-        GenerateText(game, x, y, message, number, Turn, textEvents, Delay)},game
-    ));
-
-}
-
 /**
- * Generates a temporary text that floats upwards or downwards, often showing the damage of the attack or showing that a passive is active. Has a known bug with text not clearing sometimes.
- * @param game
- * @param x
- * @param y
- * @param message
- * @param number
- * @param Turn
- * @param textEvents
- * @param Delay
- * @constructor
- */
-function GenerateText(game, x, y, message, number, Turn, textEvents, Delay){
-    var combatTextFont = "25px Alphabeta";
-    if (Turn.Turn){
-        var Color = "#3cd100";
-    }
-    else{
-        Color = "#d1000c";
-    }
-    var value;
-    if (isNaN(number)){
-        value = "";
-    }
-    else{
-        Math.round(number);
-    }
-
-    var BaseDelay = 1000;
-    var combatText = game.add.text(x, y - 32, message + number, {font: combatTextFont, fill: Color, stroke: "#ffffff", strokeThickness: 2});
-    combatText.anchor.setTo(0.5, 0);
-    combatText.align = 'center';
-    console.log(textEvents);
-    if (y < 288) {
-        game.add.tween(combatText).to({y: y + 300}, 1500, Phaser.Easing.Linear.none, true);
-    }
-    else{
-        game.add.tween(combatText).to({y: y - 300}, 1500, Phaser.Easing.Linear.none, true);
-    }
-    textEvents.push(game.time.events.add(1000, function (){
-        DestroyText(combatText)
-    }, game));
-}
-
-function DestroyText(combatText){
-    console.log("Destroying Text");
-    combatText.destroy();
-}
-
-
-/**
- *Player Attack Function, if passives are present uses ApplyPassive, otherwise goes to the DealDamage function
+ * Player Attack Function, if passives are present uses ApplyPassive, otherwise goes to the DealDamage function
  * @param game
  * @param Player
  * @param Enemy
  * @param Turn
  * @param PassiveEffects
  * @param Burn
+ * @param combatEvents
+ * @param textEvents
+ * @param Delay
  * @constructor
  */
 function PlayerAttack(game, Player, Enemy, Turn, PassiveEffects, Burn, combatEvents, textEvents, Delay) {
     console.log("The turn is " + Turn.Turn);
-    console.log("The enemy Passive length is " + Enemy.ENPassive.length + " and the player passive length is " + Player.PCPassive.length);
+    console.log("The enemy Passive length is " + Enemy.Passives.length + " and the player passive length is " + Player.PCPassive.length);
     console.log(textEvents);
-    for (var i = 0; i < Player.PCPassive.length || i < Enemy.ENPassive.length; i++) {
-        ApplyPassive(game, Player, Enemy, Player.PCPassive[i], Enemy.ENPassive[i], PassiveEffects, Burn, Turn, Delay);
+    for (var i = 0; i < Player.PCPassive.length || i < Enemy.Passives.length; i++) {
+        ApplyPassive(game, Player, Enemy, Player.PCPassive[i], Enemy.Passives[i], PassiveEffects, Burn, Turn, Delay);
     }
-    DealDamage(game, PassiveEffects, Player, Enemy, Player.PCPATK, Enemy.ENPDEF, Burn, Turn, combatEvents, textEvents, Delay);
-    console.log("Now Enemy HP is " + Enemy.ENHP);
+    DealDamage(game, PassiveEffects, Player, Enemy, Player.PCPATK, Enemy.PDEF, Burn, Turn, combatEvents, textEvents, Delay);
+    console.log("Now Enemy HP is " + Enemy.HP);
     Turn.Turn = false;
 }
 
@@ -252,16 +193,19 @@ function PlayerAttack(game, Player, Enemy, Turn, PassiveEffects, Burn, combatEve
  * @param Turn
  * @param PassiveEffects
  * @param Burn
+ * @param combatEvents
+ * @param textEvents
+ * @param Delay
  * @constructor
  */
 function EnemyAttack(game, Player, Enemy, Turn, PassiveEffects, Burn, combatEvents, textEvents, Delay) {
     console.log("The turn is " + Turn.Turn);console.log("Player HP was at " + Player.PCCURHP);
-    console.log("The enemy Passive length is " + Enemy.ENPassive.length + " and the player passive length is " + Player.PCPassive.length);
+    console.log("The enemy Passive length is " + Enemy.Passives.length + " and the player passive length is " + Player.PCPassive.length);
     console.log(textEvents);
-    for (var i = 0; i < Enemy.ENPassive.length || i < Player.PCPassive.length; i++) {
-        ApplyPassive(game, Player, Enemy, Player.PCPassive[i], Enemy.ENPassive[i], PassiveEffects, Burn, Turn, textEvents, Delay);
+    for (var i = 0; i < Enemy.Passives.length || i < Player.PCPassive.length; i++) {
+        ApplyPassive(game, Player, Enemy, Player.PCPassive[i], Enemy.Passives[i], PassiveEffects, Burn, Turn, textEvents, Delay);
     }
-    DealDamage(game, PassiveEffects, Enemy, Player, Enemy.ENPATK, Player.PCPDEF, Burn, Turn, combatEvents, textEvents, Delay);
+    DealDamage(game, PassiveEffects, Enemy, Player, Enemy.PATK, Player.PCPDEF, Burn, Turn, combatEvents, textEvents, Delay);
     console.log("Now Player HP is " + Player.PCCURHP);
     Turn.Turn = true;
 }
@@ -313,7 +257,7 @@ function ApplyPassive(game, PC, Enemy, PPassive, EPassive, PassiveEffects, Burn,
         console.log("Attempting Player's Critical");
         if (RNG < PPassive.PassiveX) {
             console.log("Activating Player's Critical");
-            new CombatTextGen(game, Enemy.enemysprite.x, Enemy.enemysprite.y, "Critical Hit!", "", Turn, textEvents, Delay);
+            new CombatTextGen(game, Enemy.sprite.x, Enemy.sprite.y, "Critical Hit!", "", Turn, textEvents, Delay);
             PassiveEffects.Critical = 2;
         }
         else {
@@ -322,7 +266,7 @@ function ApplyPassive(game, PC, Enemy, PPassive, EPassive, PassiveEffects, Burn,
     }
     else if (PPassive.Passive === "Burn") {
         Burn.PBurn += PPassive.PassiveX;
-        new CombatTextGen(game, Enemy.enemysprite.x, Enemy.enemysprite.y, "Burning for ", Burn.PBurn, Turn, textEvents, Delay);
+        new CombatTextGen(game, Enemy.sprite.x, Enemy.sprite.y, "Burning for ", Burn.PBurn, Turn, textEvents, Delay);
         console.log("Player's Burn Applied! Currently " + Burn.PBurn)
     }
     /**Passives belonging to the enemy that activate when the player is attacking*/
@@ -364,7 +308,7 @@ function ApplyPassive(game, PC, Enemy, PPassive, EPassive, PassiveEffects, Burn,
             console.log("Getting attacked, attempting Player's  Parry");
             if (RNG < PPassive.PassiveX) {
                 console.log("Activating Players's Parry");
-                new CombatTextGen(game, Enemy.enemysprite.x, Enemy.enemysprite.y, "Parried!", "", Turn, textEvents, Delay);
+                new CombatTextGen(game, Enemy.sprite.x, Enemy.sprite.y, "Parried!", "", Turn, textEvents, Delay);
                 PassiveEffects.Parry = 0;
             }
             else {

@@ -55,7 +55,10 @@ function PCCharProto(game, GridArr, xpos, ypos, GridX, GridY, scalenum) {
 }
 
 /**
- *
+ * Equipment prototype, values are generated in thing gen
+ * @param game
+ * @param IDParam
+ * @param TypeParam
  * @param QualityParam
  * @param GotEquipParam
  * @param PCSTRStatParam
@@ -87,26 +90,26 @@ function EnemyProto(game, xpos, ypos, IDParam, QualityParam, ENSTRStatParam, Pas
     var RNG = parseInt((Math.random() *  3), 10);
     console.log("When generating enemy sprite, RNG was " + RNG);
     if (RNG === 0) {
-        this.enemysprite = game.add.sprite(xpos, ypos, 'DH0');
+        this.sprite = game.add.sprite(xpos, ypos, 'DH0');
     }
     else if (RNG === 1){
-        this.enemysprite = game.add.sprite(xpos, ypos, 'DH1');
+        this.sprite = game.add.sprite(xpos, ypos, 'DH1');
     }
     else if (RNG === 2){
-        this.enemysprite = game.add.sprite(xpos, ypos, 'DH2');
+        this.sprite = game.add.sprite(xpos, ypos, 'DH2');
     }
-    console.log(this.enemysprite);
-    this.enemysprite.scale.setTo(scalenum, scalenum);
+    console.log(this.sprite);
+    this.sprite.scale.setTo(scalenum, scalenum);
     this.Quality = QualityParam;
-    this.ENSTRStat = ENSTRStatParam;
-    this.ENHP = 100 + this.ENSTRStat;
-    this.ENPATK = 5 + this.ENSTRStat;
-    this.ENPDEF = 5 + (0.1 * this.ENSTRStat);
-    this.ENSTR = this.ENSTRStat;
+    this.STRStat = ENSTRStatParam;
+    this.HP = 100 + this.STRStat;
+    this.PATK = 5 + this.STRStat;
+    this.PDEF = 5 + (0.1 * this.STRStat);
+    this.STR = this.STRStat;
     console.log(PassiveParam);
-    this.ENPassive = PassiveParam;
-    game.physics.enable(this.enemysprite, Phaser.Physics.ARCADE);
-    this.enemysprite.inputEnabled = true;
+    this.Passives = PassiveParam;
+    game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+    this.sprite.inputEnabled = true;
 
 }
 
@@ -135,21 +138,20 @@ function TileProto(game, xpos, ypos, basetile, scalenum){
 /**
  * Chest Prototype, used in ChestGen.
  * @param game
- * @param IDParam
+ * @param cfs
  * @param xpos
  * @param ypos
  * @param loot
- * @param scalenum
  * @constructor
  */
-function ChestProto(game, IDParam, xpos, ypos, loot, scalenum){
-    this.ID = IDParam;
+function ChestProto(game, cfs, xpos, ypos, loot){
+    this.ID = cfs.ChestID;
     this.Looted = false;
     this.chestsprite = game.add.sprite(xpos, ypos, 'DHChest');
-    this.chestsprite.scale.setTo(scalenum, scalenum);
+    this.chestsprite.scale.setTo(cfs.scalenum, cfs.scalenum);
     this.ChestLoot = loot;
     console.log(this.ChestLoot);
-    game.physics.enable(this.chestsprite, Phaser.Physics.ARCADE)
+    game.physics.enable(this.chestsprite, Phaser.Physics.ARCADE);
     this.chestsprite.inputEnabled = true;
 
 
@@ -192,8 +194,10 @@ function MakeObject(game, obj, GridX, GridY, xpos, ypos, spritenamezero, spriten
         obj.TileSprite.scale.setTo(scalenum, scalenum);
     }
     else if (obj.TileType === 3) {
+        console.log("Generating Chest");
     }
     else if (obj.TileType === 4) {
+        console.log("Generating Enemy");
     }
     else if (obj.TileType === 5) {
         console.debug("Generating player");

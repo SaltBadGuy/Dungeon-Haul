@@ -5,34 +5,27 @@
 /**
  * Either creates a whole new player or spawns them at their new intended position on floor generation
  * @param game
- * @param PC
- * @param height
- * @param width
- * @param GridArr
- * @param scalenum
+ * @param cfs
  * @return {*}
  * @constructor
  */
-function SpawnPlayer(game, PC, height, width, GridArr, scalenum) {
-    console.log(GridArr);
-    console.log(PC);
-    for (i = 0; i < (height); i++) {
-        for (j = 0; j < (width); j++) {
-            if (GridArr[i][j].TileType === 5) {
-                if (Object.getOwnPropertyNames(PC).length === 0)
+function SpawnPlayer(game, cfs) {
+    console.log(cfs.GridArr);
+    console.log(cfs.PC);
+    for (i = 0; i < (cfs.height); i++) {
+        for (j = 0; j < (cfs.width); j++) {
+            if (cfs.GridArr[i][j].TileType === 5) {
+                if (Object.getOwnPropertyNames(cfs.PC).length === 0)
                 {
-                    var GeneratedPlayer = new GeneratePlayer(game, GridArr, GridArr[i][j].TileXPos, GridArr[i][j].TileYPos, i, j, scalenum);
+                    var GeneratedPlayer = new GeneratePlayer(game, cfs.GridArr, cfs.GridArr[i][j].TileXPos, cfs.GridArr[i][j].TileYPos, i, j, cfs.scalenum);
                     console.log(GeneratedPlayer);
-                    PC = GeneratedPlayer;
-                    console.log(PC);
-                    return PC;
+                    cfs.PC = GeneratedPlayer;
                 }
                 else{
-                    PC.GridX = i;
-                    PC.GridY = j;
-                    PC.pcsprite.x = GridArr[i][j].TileXPos;
-                    PC.pcsprite.y = GridArr[i][j].TileYPos;
-                    return PC;
+                    cfs.PC.GridX = i;
+                    cfs.PC.GridY = j;
+                    cfs.PC.pcsprite.x = cfs.GridArr[i][j].TileXPos;
+                    cfs.PC.pcsprite.y = cfs.GridArr[i][j].TileYPos;
                 }
             }
         }

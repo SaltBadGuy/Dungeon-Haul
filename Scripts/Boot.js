@@ -11,6 +11,8 @@ BasicGame.Boot.prototype = {
 
     init: function () {
 
+        console.log("Starting Boot!");
+
         //  Unless you specifically know your game needs to support multi-touch I would recommend setting this to 1
         this.input.maxPointers = 1;
 
@@ -46,6 +48,7 @@ BasicGame.Boot.prototype = {
 
         //  By this point the preloader assets have loaded to the cache, we've set the game settings
         //  So now let's start the real preloader going
+        console.log("Boot Done!");
         this.state.start('Preloader');
 
     }

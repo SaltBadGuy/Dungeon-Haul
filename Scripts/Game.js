@@ -40,28 +40,7 @@ var keyZ;
 var keyX;
 var keyC;
 
-//Player character and its stats
-var PC = {};
-
-var CurrentFloor = 0;
-var StairObject = {};
-
-//IDs, used to keep track of instances of objects
-var EquipID = 0;
-var EnemyID = 0;
-var ChestID = 0;
-var PlayerID = 0;
-
-/*Arrays for storing enemies and chests*/
-
-var EnemyArr = [];
-var ChestArr = [];
-
-var InCombat;
-
-var PCHeadEquip;
-var PCChestEquip;
-var PCWeaponEquip;
+var FloorArr = [];
 
 var GridArr = [
     [1, 2],
@@ -85,6 +64,65 @@ var GridArr = [
     [37, 38]
 ];
 
+//Player character and its stats
+var PC = {};
+
+var CurrentFloor = 0;
+var StairObject = {};
+
+//IDs, used to keep track of instances of objects
+var EquipID = 0;
+var EnemyID = 0;
+var ChestID = 0;
+var PlayerID = 0;
+
+/*Arrays for storing enemies and chests*/
+var InCombat;
+
+var cfs = {
+    CurrentFloorNum: 0,
+    width: 0,
+    height: 0,
+    scalenum: 0,
+    cellsize: 0,
+    gridwidth: 0,
+    gridheight: 0,
+    gridwidthgap: 0,
+    gridheightgap: 0,
+    GridArr: [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+        [9, 10],
+        [11, 12],
+        [13, 14],
+        [15, 16],
+        [17, 18],
+        [19, 20],
+        [21, 22],
+        [23, 24],
+        [25, 26],
+        [27, 28],
+        [29, 30],
+        [31, 32],
+        [33, 34],
+        [35, 36],
+        [37, 38]
+    ],
+    EnemyArr: [{}],
+    ChestArr: [{}],
+    PC: {},
+    StairObject: 0,
+    EnemyID: 0,
+    ChestID: 0,
+    EquipID: 0
+};
+
+var PCHeadEquip;
+var PCChestEquip;
+var PCWeaponEquip;
+
 var Turn;
 var timerEvents = [];
 var textEvents = [];
@@ -92,16 +130,6 @@ var textEvents = [];
 var Element1 = "aaa";
 var Element2 = "bbb";
 
-/**Floor Generation Stats*/
-
-var width;
-var height;
-var scalenum;
-var cellsize;
-var gridwidth;
-var gridheight;
-var gridwidthgap;
-var gridheightgap;
 
 /**Hud Variables**/
 var HudText;
@@ -110,83 +138,81 @@ var HintsEvents = [];
 var HintToDisplay;
 
 /**Floor Generation Return**/
+var CurrentFloorStuff;
 var FloorStuff;
 
 BasicGame.Game.prototype = {
 
-    preload: function () {
-        //Sprites
-            // Player character sprite
-        game.load.image('DHPC', 'Assets/DHPC.png');
-        //Floor tile sprite
-        game.load.image('DHFloor', 'Assets/DHFloor.png');
-        //Wall tile sprite
-        game.load.image('DHWall', 'Assets/DHStoneWall1.png');
-        //Bedrock tile sprite
-        game.load.image('DHBedrock', 'Assets/DHBedrock.png');
-        //Chest Sprite
-        game.load.image('DHChest', 'Assets/DHChest.png');
-        //Enemy 0 Sprite
-        game.load.image('DH0', 'Assets/DHZombie.png');
-        //Enemy 1 Sprite
-        game.load.image('DH1', 'Assets/DHSkeleton.png');
-        //Enemy 2 Sprite
-        game.load.image('DH2', 'Assets/DHDemon.png');
-        //Staircase sprite
-        game.load.image('DHStairs', 'Assets/DHStairs.png');
-        //HUD sprite
-        game.load.image('DHHUD', 'Assets/DHHUD.png');
-        //Text file with hints
-        game.load.text('Hints', 'Assets/Hints.txt');
-},
 
-    create: function () {
+create: function () {
 
         //Plugin initialization
 
         //Physics system, used for player movement, collision detection and is planned to be used for particles
 
-        game.physics.startSystem(Phaser.Physics.ARCADE);
+    console.log(cfs);
 
-        //InCombat object, needs to be an object because it needs to be changed in functions it's passed to
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    /**
+     * InCombat object, needs to be an object because it needs to be changed in functions it's passed to
+     */
+
         InCombat = {
             InCombat: false
         };
 
-        EnemyArr = [];
+        var canvaswidth = this.game.canvas.width;
+        var canvasheight = this.game.canvas.height;
 
-        width = 17;
-        height = 17;
-        scalenum = 2;
-        cellsize = 16 * scalenum;
-        gridwidth = cellsize * (width + 1);
-        gridheight = cellsize * (height + 1);
-        gridwidthgap = game.canvas.width - gridwidth;
-        gridheightgap = game.canvas.height - gridheight;
+        console.log(cfs);
+        cfs.width = 17;
+        cfs.height = 17;
+        cfs.scalenum = 2;
+        cfs.EnemyID = 0;
+        cfs.ChestID = 0;
+        cfs.EquipID = 0;
+        cfs.cellsize = 16 * cfs.scalenum;
+        cfs.gridwidth = cfs.cellsize * (cfs.width + 1);
+        cfs.gridheight = cfs.cellsize * (cfs.height + 1);
+        cfs.gridwidthgap = canvaswidth - cfs.gridwidth;
+        cfs.gridheightgap = canvasheight - cfs.gridheight;
 
-        FloorStuff = new PlayGen(game, height, width, cellsize, gridwidth, gridheight, gridwidthgap, gridheightgap, GridArr, EnemyArr, ChestArr, scalenum, PC, StairObject, EnemyID, ChestID, EquipID, CurrentFloor);
+        scalenum = cfs.scalenum;
 
-        GridArr = FloorStuff.GridArr;
-        PC = FloorStuff.PC;
-        StairObject = FloorStuff.StairObject;
-        CurrentFloor = FloorStuff.CurrentFloor;
+        console.log(cfs);
 
-        var DHHud = game.add.tileSprite(0, 0, 224, 576, 'DHHUD');
+        /*
+        cfs.width = 17;
+        cfs.height = 17;
+        cfs.scalenum = 2;
+        cfs.cellsize = 16 * cfs.scalenum;
+        cfs.gridwidth = cfs.cellsize * (cfs.width + 1);
+        cfs.gridheight = cfs.cellsize * (cfs.height + 1);
+        cfs.gridwidthgap = this.game.canvas.width - cfs.gridwidth;
+        cfs.gridheightgap = this.game.canvas.height - cfs.gridheight;
+        */
+
+        new PlayGen(this.game, cfs);
+
+        console.log(cfs.PC);
+
+        var DHHud = this.game.add.tileSprite(0, 0, 224, 576, 'DHHUD');
 
         DHHud.tint = 0x474546;
 
-        for (var i = 0; i < EnemyArr.length; i++){
-            console.log(EnemyArr[i]);
+        for (var i = 0; i < cfs.EnemyArr.length; i++){
+            console.log(cfs.EnemyArr[i]);
         }
 
-        var HintsFile = game.cache.getText('Hints');
+        var HintsFile = this.game.cache.getText('Hints');
 
         hints = HintsFile.split('\n');
         console.log(hints);
 
         HintDisplay();
 
-        HintsEvents.push(game.time.events.loop(10000, function () {
+        HintsEvents.push(this.game.time.events.loop(10000, function () {
             HintDisplay()
         }, this));
 
@@ -204,39 +230,41 @@ BasicGame.Game.prototype = {
         //Creates a PCWeaponEquip (A weapon)
         PCWeaponEquip = new PCEquipProto;
 
-        game.stage.backgroundColor = '#000000';
+        this.game.stage.backgroundColor = '#000000';
 
         //TODO: ENEMY STAT SCREEN
 
         //Enable physics for the player, this is what is used to let him move and gain a hitbox for collision detection
 
         //game.physics.arcade.enable(PC);
-        for (var i = 0; i < EnemyArr.length; i++){
-            game.physics.arcade.enable(EnemyArr[i]);
+        for (var i = 0; i < cfs.EnemyArr.length; i++){
+            this.game.physics.arcade.enable(cfs.EnemyArr[i]);
         }
 
-        HudText = new HudInitialize(game, PC, gridwidthgap, gridheightgap, EnemyArr, CurrentFloor, Element1, Element2);
+        console.log(cfs);
+
+        HudText = new HudInitialize(this, cfs, Element1, Element2);
 
         //Capture input for controlling player.
         //NOTE: This captures the initial press of the key. This is intended as the movement is grid-based and this prevents players from accidentally moving more squares than they need to.
-        keyUp = game.input.keyboard.addKey(Phaser.Keyboard.W);
+        keyUp = this.game.input.keyboard.addKey(Phaser.Keyboard.W);
         keyUp.onDown.add(function(){
-            PCMoveUp(PC, game, GridArr, InCombat);
+            PCMoveUp(cfs.PC, this.game, cfs.GridArr, InCombat);
         }, this);
 
-        keyDown = game.input.keyboard.addKey(Phaser.Keyboard.S);
+        keyDown = this.game.input.keyboard.addKey(Phaser.Keyboard.S);
         keyDown.onDown.add(function(){
-            PCMoveDown(PC, game, GridArr, InCombat);
+            PCMoveDown(cfs.PC, this.game, cfs.GridArr, InCombat);
         }, this);
 
-        keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.A);
+        keyLeft = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
         keyLeft.onDown.add(function(){
-            PCMoveLeft(PC, game, GridArr, InCombat);
+            PCMoveLeft(cfs.PC, this.game, cfs.GridArr, InCombat);
         }, this);
 
-        keyRight = game.input.keyboard.addKey(Phaser.Keyboard.D);
+        keyRight = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
         keyRight.onDown.add(function(){
-            PCMoveRight(PC, game, GridArr, InCombat);
+            PCMoveRight(cfs.PC, this.game, cfs.GridArr, InCombat);
         }, this);
 
         /*
@@ -265,79 +293,88 @@ BasicGame.Game.prototype = {
          */
 
         //Activate Potion
-        keyZ = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+        keyZ = this.game.input.keyboard.addKey(Phaser.Keyboard.Z);
         keyZ.onDown.add(function() {
-            ActivatePotion(PC, InCombat);
+            ActivatePotion(cfs.PC, InCombat);
         }, this);
 
         //Activate Pick
-        keyX = game.input.keyboard.addKey(Phaser.Keyboard.X);
+        keyX = this.game.input.keyboard.addKey(Phaser.Keyboard.X);
         keyX.onDown.add(function(){
-            ActivatePick(PC, InCombat);
+            ActivatePick(cfs.PC, InCombat);
         }, this);
 
         //Activate Curse
-        keyC = game.input.keyboard.addKey(Phaser.Keyboard.C);
+        keyC = this.game.input.keyboard.addKey(Phaser.Keyboard.C);
         keyC.onDown.add(function(){
-            ActivateCurse(PC, InCombat);
+            ActivateCurse(cfs.PC, InCombat);
         }, this);
-        keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACE);
+        keySpace = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACE);
 
 
-        game.input.keyboard.removeKeyCapture(Phaser.Keyboard.W);
-        game.input.keyboard.removeKeyCapture(Phaser.Keyboard.S);
-        game.input.keyboard.removeKeyCapture(Phaser.Keyboard.A);
-        game.input.keyboard.removeKeyCapture(Phaser.Keyboard.D);
-        game.input.keyboard.removeKeyCapture(Phaser.Keyboard.J);
+        this.game.input.keyboard.removeKeyCapture(Phaser.Keyboard.W);
+        this.game.input.keyboard.removeKeyCapture(Phaser.Keyboard.S);
+        this.game.input.keyboard.removeKeyCapture(Phaser.Keyboard.A);
+        this.game.input.keyboard.removeKeyCapture(Phaser.Keyboard.D);
+        this.game.input.keyboard.removeKeyCapture(Phaser.Keyboard.J);
 
-        PC.PCHeadEquip = new PCEquipProto(game, 0, "Helmet", 1, false, 0, "N/A");
-        PC.PCChestEquip = new PCEquipProto(game, 0, "ChestArmour", 1, false, 0, "N/A");
-        PC.PCWeaponEquip = new PCEquipProto(game, 0, "Weapon", 1, false, 0, "N/A");
+        console.log(cfs.PC);
 
-        //text = game.add.text(700, 30, 'Time: 0', { font: "32px alphabeta", fill: "#ffffff", align: "center" });
-        //.anchor.setTo(0.5, 0.5);
+        cfs.PC.PCHeadEquip = new PCEquipProto(this, 0, "Helmet", 1, false, 0, "N/A");
+        cfs.PC.PCChestEquip = new PCEquipProto(this, 0, "ChestArmour", 1, false, 0, "N/A");
+        cfs.PC.PCWeaponEquip = new PCEquipProto(this, 0, "Weapon", 1, false, 0, "N/A");
 
-        for (var i = 0; i < EnemyArr.length; i++){
-            console.log(EnemyArr[i]);
-            game.physics.enable(EnemyArr[i].enemysprite, Phaser.Physics.ARCADE);
-            EnemyArr[i].enemysprite.inputEnabled = true;
+        for (var i = 0; i < cfs.EnemyArr.length; i++){
+            console.log(cfs.EnemyArr[i]);
+            this.game.physics.enable(cfs.EnemyArr[i].sprite, Phaser.Physics.ARCADE);
+            cfs.EnemyArr[i].sprite.inputEnabled = true;
         }
 
-        console.log(PC);
-        console.log(ChestArr);
+
+        console.log(cfs);
+        console.log(cfs.PC);
+        console.log(cfs.ChestArr);
+        console.log(cfs.EnemyArr);
 
     },
 
+
+    //
+    //
+    //UPDATE
+    //
+    //
+
     update: function () {
 
-        for (i = 0; i < EnemyArr.length; i++) {
-            if (EnemyArr[i].enemysprite.input.pointerOver()) {
+        for (i = 0; i < cfs.EnemyArr.length; i++) {
+            if (cfs.EnemyArr[i].sprite.input.pointerOver()) {
                 var Title;
-                if (EnemyArr[i].Quality === 1){
+                if (cfs.EnemyArr[i].Quality === 1){
                     Title = "Common ";
                 }
-                else if (EnemyArr[i].Quality === 1.5){
+                else if (cfs.EnemyArr[i].Quality === 1.5){
                     Title = "Magical ";
                 }
-                else if (EnemyArr[i].Quality === 2){
+                else if (cfs.EnemyArr[i].Quality === 2){
                     Title = "Epic ";
                 }
-                else if (EnemyArr[i].Quality === 3){
+                else if (cfs.EnemyArr[i].Quality === 3){
                     Title = "Mythical ";
                 }
                 HudText.TextElement1.setText(Title + "Enemy");
-                if (EnemyArr[i].ENPassive.length > 0){
+                if (cfs.EnemyArr[i].Passives.length > 0){
                     EnemyPassivesString = "and ";
                     PassiveStringConcat = "";
-                    for (j = 0; j < EnemyArr[i].ENPassive.length; j++){
-                        PassiveStringConcat = PassiveStringConcat.concat(" and " + EnemyArr[i].ENPassive[j].Passive + " " + EnemyArr[i].ENPassive[j].PassiveX + "%");
+                    for (j = 0; j < cfs.EnemyArr[i].Passives.length; j++){
+                        PassiveStringConcat = PassiveStringConcat.concat(" and " + cfs.EnemyArr[i].Passives[j].Passive + " " + cfs.EnemyArr[i].Passives[j].PassiveX + "%");
                         EnemyPassivesString = PassiveStringConcat;
                     }
                 }
                 else{
                     EnemyPassivesString = "";
                 }
-                HudText.TextElement2.setText("This enemy's HP is " + Math.round(EnemyArr[i].ENHP) + " with a ATK of " + Math.round(EnemyArr[i].ENPATK) + " and a DEF of " + Math.round(EnemyArr[i].ENPDEF) + EnemyPassivesString);
+                HudText.TextElement2.setText("This enemy's HP is " + Math.round(cfs.EnemyArr[i].HP) + " with a ATK of " + Math.round(cfs.EnemyArr[i].PATK) + " and a DEF of " + Math.round(cfs.EnemyArr[i].PDEF) + EnemyPassivesString);
                 HudText.TextElement1.alpha = 1;
                 HudText.TextElement2.alpha = 1;
             }
@@ -345,31 +382,31 @@ BasicGame.Game.prototype = {
             {
                 //bunny.alpha = 0.5;
             }
-            game.physics.arcade.collide(PC.pcsprite, EnemyArr[i].enemysprite, function () {
-                ColliderEnemy(game, timerEvents, textEvents, PC, EnemyArr[i], InCombat, Turn)
+            this.game.physics.arcade.collide(cfs.PC.pcsprite, cfs.EnemyArr[i].sprite, function () {
+                ColliderEnemy(this.game, timerEvents, textEvents, cfs.PC, cfs.EnemyArr[i], InCombat, Turn)
             }, null, this);
         }
 
-        for (var i = 0; i < ChestArr.length; i++) {
-            if (ChestArr[i].Looted === false) {
-                if (ChestArr[i].chestsprite.input.pointerOver()) {
+        for (var i = 0; i < cfs.ChestArr.length; i++) {
+            if (cfs.ChestArr[i].Looted === false) {
+                if (cfs.ChestArr[i].chestsprite.input.pointerOver()) {
                     HudText.TextElement1.setText("Chest");
                     HudText.TextElement2.setText("This can contain a potion, a pick, a curse or equipment.");
                     HudText.TextElement1.alpha = 1;
                     HudText.TextElement2.alpha = 1;
                 }
                 if (!InCombat.InCombat) {
-                    game.physics.arcade.collide(PC.pcsprite, ChestArr[i].chestsprite, function () {
-                        CheckChest(game, PC, ChestArr[i], HudText, textEvents)
+                    this.game.physics.arcade.collide(cfs.PC.pcsprite, cfs.ChestArr[i].chestsprite, function () {
+                        new CheckChest(this.game, cfs, cfs.ChestArr[i], HudText, textEvents)
                     }, null, this);
                 }
             }
             else{
-                ChestArr[i].chestsprite.destroy();
+                cfs.ChestArr[i].chestsprite.destroy();
             }
         }
 
-        if(StairObject.StairSprite.input.pointerOver()) {
+        if(cfs.StairObject.StairSprite.input.pointerOver()) {
             HudText.TextElement1.setText("Staircase");
             HudText.TextElement2.setText("This leads you to the next floor");
             HudText.TextElement1.alpha = 1;
@@ -377,18 +414,18 @@ BasicGame.Game.prototype = {
         }
 
         if (!InCombat.InCombat) {
-            game.physics.arcade.collide(PC.pcsprite, StairObject.StairSprite, function () {
-                ColliderStairsCall()
+            this.game.physics.arcade.collide(cfs.PC.pcsprite, cfs.StairObject.StairSprite, function () {
+                ColliderStairs(this.game, cfs, HudText, textEvents)
             }, null, this);
         }
 
-        if (!(typeof StairObject.StairSprite === "undefined")) {
-            game.world.bringToTop(StairObject.StairSprite);
+        if (!(typeof cfs.StairObject.StairSprite === "undefined")) {
+            this.game.world.bringToTop(cfs.StairObject.StairSprite);
         }
 
-        if (!(typeof PC === "undefined")) {
-            game.world.bringToTop(PC.pcsprite);
-            if(PC.pcsprite.input.pointerOver()) {
+        if (!(typeof cfs.PC === "undefined")) {
+            this.game.world.bringToTop(cfs.PC.pcsprite);
+            if(cfs.PC.pcsprite.input.pointerOver()) {
                 HudText.TextElement1.setText("Player");
                 HudText.TextElement2.setText("This is you! Survive as many floors as possible!");
                 HudText.TextElement1.alpha = 1;
@@ -397,35 +434,35 @@ BasicGame.Game.prototype = {
         }
 
         //Save the MAXHP at the start of the step before any changes are made
-        if (!(typeof PC === "undefined")) {
-            PrevMAXHP = PC.PCMAXHP;
+        if (!(typeof cfs.PC === "undefined")) {
+            PrevMAXHP = cfs.PC.PCMAXHP;
 
             //Updates all stats
-            PC.PCSTR = PC.BasePCSTR + PC.PCHeadEquip.PCSTRStat + PC.PCChestEquip.PCSTRStat + PC.PCWeaponEquip.PCSTRStat;
+            cfs.PC.PCSTR = cfs.PC.BasePCSTR + cfs.PC.PCHeadEquip.PCSTRStat + cfs.PC.PCChestEquip.PCSTRStat + cfs.PC.PCWeaponEquip.PCSTRStat;
 
             //Refers to the player's physical attack. Is increased by Strength in the current prototype and has a base value of 20.
-            PC.PCPATK = Math.floor(20 + (0.2 * PC.PCSTR));
-            PC.PCPDEF = Math.floor(5 + (0.1 * PC.PCSTR));
+            cfs.PC.PCPATK = Math.floor(20 + (0.2 * cfs.PC.PCSTR));
+            cfs.PC.PCPDEF = Math.floor(5 + (0.1 * cfs.PC.PCSTR));
 
-            PC.PCMAXHP = Math.floor(PC.BaseMaxHP + (0.5 * PC.PCSTR));
+            cfs.PC.PCMAXHP = Math.floor(cfs.PC.BaseMaxHP + (0.5 * cfs.PC.PCSTR));
 
             //If the player's current HP exceeds the max HP, cut it down to the max HP
-            if (PC.PCCURHP > PC.PCMAXHP) {
+            if (cfs.PC.PCCURHP > cfs.PC.PCMAXHP) {
                 console.log("Max HP exceeded, cutting down current HP");
-                PC.PCCURHP = PC.PCMAXHP;
+                cfs.PC.PCCURHP = cfs.PC.PCMAXHP;
             }
 
             //Check if the MAXHP has changed during this step and if the player was at full health before update the CURHP to match the new MAXHP
-            if (PC.PCMAXHP !== PrevMAXHP) {
-                if (PC.PCCURHP === PrevMAXHP) {
-                    PC.PCCURHP = PC.PCMAXHP;
+            if (cfs.PC.PCMAXHP !== PrevMAXHP) {
+                if (cfs.PC.PCCURHP === PrevMAXHP) {
+                    cfs.PC.PCCURHP = cfs.PC.PCMAXHP;
                     console.log("Player was at full health before, matching their hp to their new maximum");
                 }
             }
 
-            Math.round(PC.PCCURHP);
+            Math.round(cfs.PC.PCCURHP);
 
-            UpdateHudElements(game, HudText, PC, EnemyArr[0], CurrentFloor, HintToDisplay);
+            new UpdateHudElements(this.game, HudText, cfs.PC, cfs.EnemyArr[0], cfs.CurrentFloorNum, HintToDisplay);
         }
 
     },
@@ -436,12 +473,12 @@ BasicGame.Game.prototype = {
         //  Stop music, delete sprites, purge caches, free resources, all that good stuff.
 
         //  Then let's go back to the main menu.
-        this.state.start('MainMenu');
+        this.game.state.start('MainMenu');
 
     },
-
+/*
     render: function(){
-        /**
+
          if(!(typeof PC === "undefined")) {
                 game.debug.body(PC.pcsprite);
             }
@@ -450,11 +487,11 @@ BasicGame.Game.prototype = {
                 game.debug.body(ChestArr[i].chestsprite);
             }
          for (var j = 0; j < EnemyArr.length; j++) {
-                game.debug.body(EnemyArr[j].enemysprite);
+                game.debug.body(EnemyArr[j].sprite);
             }
          if(!(typeof StairObject === "undefined")) {
                 game.debug.body(StairObject.StairSprite);
             }
-         */
-    }
+
+    }*/
 };

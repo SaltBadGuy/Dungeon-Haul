@@ -145,7 +145,12 @@ function UpdateHudElements(game, HudText, PC, enemy, CurrentFloor) {
 
     HudText.FloorNo.setText("Floor " + CurrentFloor);
 
-    HintToDisplay = hints[Math.floor(Math.random()* hints.length)]
 
     HudText.HintText.setText(HintToDisplay);
+}
+
+function HintDisplay(){
+
+    HintToDisplay = hints[Math.floor(Math.random()* hints.length)]
+
 }

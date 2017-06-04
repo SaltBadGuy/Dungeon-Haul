@@ -2,7 +2,14 @@
  * Created by Callum on 05/03/2017.
  */
 
-/** Simple movement */
+/**
+ * Simple Movement
+ * @param PC
+ * @param game
+ * @param GridArr
+ * @param InCombat
+ * @constructor
+ */
 function PCMoveUp(PC, game, GridArr, InCombat){
     if(!InCombat.InCombat) {
         var TryMove;
